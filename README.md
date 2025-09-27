@@ -11,5 +11,5 @@ O esquema relacional do banco de dados foi projetado para atender aos requisitos
 
 ![Esquema Relacional do Banco de Dados](docs/esquema_relacional.svg)
 
-Este diagrama foi gerado utilizando DBML. O código-fonte do diagrama está disponível em [`docs/esquema.dbml`](docs/esquema.dbml) e pode ser editado na plataforma [dbdiagram.io](https://dbdiagram.io).
+Este diagrama foi gerado utilizando DBML. O código-fonte do diagrama está disponível em [`docs/esquema.dbml`](docs/esquema.dbml) e pode ser visualizado na plataforma [dbdiagram.io](https://dbdiagram.io/d/68d842a1d2b621e422342762).
 
