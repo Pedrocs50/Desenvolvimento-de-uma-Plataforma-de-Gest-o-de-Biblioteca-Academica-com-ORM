@@ -1,0 +1,417 @@
+// --- Modelo Relacional para o Sistema de Biblioteca ---
+
+////
+// Entidades Principais
+////
+
+Table Usuario {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  email varchar(150) [not null, unique]
+  tipo varchar(20) [not null]
+  status varchar(20) [not null, default: 'Ativo']
+}
+// --- Modelo Relacional para o Sistema de Biblioteca ---
+
+////
+// Entidades Principais
+////
+
+Table Usuario {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  email varchar(150) [not null, unique]
+  tipo varchar(20) [not null]
+  status varchar(20) [not null, default: 'Ativo']
+}
+
+Table Autor {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  nacionalidade varchar(50)
+}
+
+Table Exemplar {
+  id int [pk, increment]
+  codigo_exemplar varchar(20) [not null, unique]
+  status varchar(20) [not null]
+  id_obra int [not null]
+}
+
+////
+// Hierarquia de Herança de Obras
+////
+
+// Tabela base para herança
+Table Obra {
+  id int [pk, increment]
+  titulo varchar(255) [not null]
+  ano_publicacao int
+  tipo_obra varchar(20) [not null, note: 'Discriminador: Livro, Tese, etc.']
+}
+
+// Subtabelas de especialização
+Table Livro {
+  id_obra int [pk]
+  isbn varchar(20)
+  editora varchar(100)
+}
+
+Table Tese {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+Table Dissertacao {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+////
+// Tabelas Transacionais e de Associação
+////
+
+// Tabela associativa para resolver o N:N
+Table ObraAutor {
+  id_obra int [ref: > Obra.id]
+  id_autor int [ref: > Autor.id]
+
+  indexes {
+    (id_obra, id_autor) [pk]
+  }
+}
+
+Table Emprestimo {
+  id int [pk, increment]
+  data_emprestimo datetime [not null]
+  data_prevista_devolucao datetime [not null]
+  data_real_devolucao datetime
+  id_usuario int [not null]
+  id_exemplar int [not null]
+}
+
+Table Reserva {
+  id int [pk, increment]
+  data_reserva datetime [not null]
+  status varchar(20) [not null]
+  id_usuario int [not null]
+  id_obra int [not null]
+}
+
+
+////
+// Definição dos Relacionamentos (Chaves Estrangeiras)
+////
+
+// Herança
+Ref: Livro.id_obra > Obra.id
+Ref: Tese.id_obra > Obra.id
+Ref: Dissertacao.id_obra > Obra.id
+
+// Relacionamentos
+Ref: Exemplar.id_obra > Obra.id
+Ref: Emprestimo.id_usuario > Usuario.id
+Ref: Emprestimo.id_exemplar > Exemplar.id
+Ref: Reserva.id_usuario > Usuario.id
+Ref: Reserva.id_obra > Obra.id // --- Modelo Relacional para o Sistema de Biblioteca ---
+
+////
+// Entidades Principais
+////
+
+Table Usuario {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  email varchar(150) [not null, unique]
+  tipo varchar(20) [not null]
+  status varchar(20) [not null, default: 'Ativo']
+}
+
+Table Autor {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  nacionalidade varchar(50)
+}
+
+Table Exemplar {
+  id int [pk, increment]
+  codigo_exemplar varchar(20) [not null, unique]
+  status varchar(20) [not null]
+  id_obra int [not null]
+}
+
+////
+// Hierarquia de Herança de Obras
+////
+
+// Tabela base para herança
+Table Obra {
+  id int [pk, increment]
+  titulo varchar(255) [not null]
+  ano_publicacao int
+  tipo_obra varchar(20) [not null, note: 'Discriminador: Livro, Tese, etc.']
+}
+
+// Subtabelas de especialização
+Table Livro {
+  id_obra int [pk]
+  isbn varchar(20)
+  editora varchar(100)
+}
+
+Table Tese {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+Table Dissertacao {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+////
+// Tabelas Transacionais e de Associação
+////
+
+// Tabela associativa para resolver o N:N
+Table ObraAutor {
+  id_obra int [ref: > Obra.id]
+  id_autor int [ref: > Autor.id]
+
+  indexes {
+    (id_obra, id_autor) [pk]
+  }
+}
+
+Table Emprestimo {
+  id int [pk, increment]
+  data_emprestimo datetime [not null]
+  data_prevista_devolucao datetime [not null]
+  data_real_devolucao datetime
+  id_usuario int [not null]
+  id_exemplar int [not null]
+}
+
+Table Reserva {
+  id int [pk, increment]
+  data_reserva datetime [not null]
+  status varchar(20) [not null]
+  id_usuario int [not null]
+  id_obra int [not null]
+}
+
+
+////
+// Definição dos Relacionamentos (Chaves Estrangeiras)
+////
+
+// Herança
+Ref: Livro.id_obra > Obra.id
+Ref: Tese.id_obra > Obra.id
+Ref: Dissertacao.id_obra > Obra.id
+
+// Relacionamentos
+Ref: Exemplar.id_obra > Obra.id
+Ref: Emprestimo.id_usuario > Usuario.id
+Ref: Emprestimo.id_exemplar > Exemplar.id
+Ref: Reserva.id_usuario > Usuario.id
+Ref: Reserva.id_obra > Obra.id // --- Modelo Relacional para o Sistema de Biblioteca ---
+
+////
+// Entidades Principais
+////
+
+Table Usuario {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  email varchar(150) [not null, unique]
+  tipo varchar(20) [not null]
+  status varchar(20) [not null, default: 'Ativo']
+}
+
+Table Autor {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  nacionalidade varchar(50)
+}
+
+Table Exemplar {
+  id int [pk, increment]
+  codigo_exemplar varchar(20) [not null, unique]
+  status varchar(20) [not null]
+  id_obra int [not null]
+}
+
+////
+// Hierarquia de Herança de Obras
+////
+
+// Tabela base para herança
+Table Obra {
+  id int [pk, increment]
+  titulo varchar(255) [not null]
+  ano_publicacao int
+  tipo_obra varchar(20) [not null, note: 'Discriminador: Livro, Tese, etc.']
+}
+
+// Subtabelas de especialização
+Table Livro {
+  id_obra int [pk]
+  isbn varchar(20)
+  editora varchar(100)
+}
+
+Table Tese {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+Table Dissertacao {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+////
+// Tabelas Transacionais e de Associação
+////
+
+// Tabela associativa para resolver o N:N
+Table ObraAutor {
+  id_obra int [ref: > Obra.id]
+  id_autor int [ref: > Autor.id]
+
+  indexes {
+    (id_obra, id_autor) [pk]
+  }
+}
+
+Table Emprestimo {
+  id int [pk, increment]
+  data_emprestimo datetime [not null]
+  data_prevista_devolucao datetime [not null]
+  data_real_devolucao datetime
+  id_usuario int [not null]
+  id_exemplar int [not null]
+}
+
+Table Reserva {
+  id int [pk, increment]
+  data_reserva datetime [not null]
+  status varchar(20) [not null]
+  id_usuario int [not null]
+  id_obra int [not null]
+}
+
+
+////
+// Definição dos Relacionamentos (Chaves Estrangeiras)
+////
+
+// Herança
+Ref: Livro.id_obra > Obra.id
+Ref: Tese.id_obra > Obra.id
+Ref: Dissertacao.id_obra > Obra.id
+
+// Relacionamentos
+Ref: Exemplar.id_obra > Obra.id
+Ref: Emprestimo.id_usuario > Usuario.id
+Ref: Emprestimo.id_exemplar > Exemplar.id
+Ref: Reserva.id_usuario > Usuario.id
+Ref: Reserva.id_obra > Obra.id 
+Table Autor {
+  id int [pk, increment]
+  nome varchar(150) [not null]
+  nacionalidade varchar(50)
+}
+
+Table Exemplar {
+  id int [pk, increment]
+  codigo_exemplar varchar(20) [not null, unique]
+  status varchar(20) [not null]
+  id_obra int [not null]
+}
+
+////
+// Hierarquia de Herança de Obras
+////
+
+// Tabela base para herança
+Table Obra {
+  id int [pk, increment]
+  titulo varchar(255) [not null]
+  ano_publicacao int
+  tipo_obra varchar(20) [not null, note: 'Discriminador: Livro, Tese, etc.']
+}
+
+// Subtabelas de especialização
+Table Livro {
+  id_obra int [pk]
+  isbn varchar(20)
+  editora varchar(100)
+}
+
+Table Tese {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+Table Dissertacao {
+  id_obra int [pk]
+  programa_pos varchar(150)
+  orientador varchar(150)
+}
+
+////
+// Tabelas Transacionais e de Associação
+////
+
+// Tabela associativa para resolver o N:N
+Table ObraAutor {
+  id_obra int [ref: > Obra.id]
+  id_autor int [ref: > Autor.id]
+
+  indexes {
+    (id_obra, id_autor) [pk]
+  }
+}
+
+Table Emprestimo {
+  id int [pk, increment]
+  data_emprestimo datetime [not null]
+  data_prevista_devolucao datetime [not null]
+  data_real_devolucao datetime
+  id_usuario int [not null]
+  id_exemplar int [not null]
+}
+
+Table Reserva {
+  id int [pk, increment]
+  data_reserva datetime [not null]
+  status varchar(20) [not null]
+  id_usuario int [not null]
+  id_obra int [not null]
+}
+
+
+////
+// Definição dos Relacionamentos (Chaves Estrangeiras)
+////
+
+// Herança
+Ref: Livro.id_obra > Obra.id
+Ref: Tese.id_obra > Obra.id
+Ref: Dissertacao.id_obra > Obra.id
+
+// Relacionamentos
+Ref: Exemplar.id_obra > Obra.id
+Ref: Emprestimo.id_usuario > Usuario.id
+Ref: Emprestimo.id_exemplar > Exemplar.id
+Ref: Reserva.id_usuario > Usuario.id
+Ref: Reserva.id_obra > Obra.id 
