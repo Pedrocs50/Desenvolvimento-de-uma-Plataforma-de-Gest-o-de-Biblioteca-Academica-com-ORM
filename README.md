@@ -15,4 +15,4 @@ Este diagrama foi gerado utilizando DBML. O código-fonte do diagrama está disp
 
 ## Comparação entre Query com API do ORM vs. Query com SQL Nativo
 
-[Comparação](docs/copmparacao.md)
+[Comparação](docs/comparacao.md)

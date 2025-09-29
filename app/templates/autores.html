@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Autores</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+        </tr>
+        {% for autor in autores %}
+        <tr>
+            <td>{{ autor.id }}</td>
+            <td>{{ autor.nome }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

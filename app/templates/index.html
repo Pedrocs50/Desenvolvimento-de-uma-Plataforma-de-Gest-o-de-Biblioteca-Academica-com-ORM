@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Página Inicial</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-gray-800">Bem-vindo à Plataforma de Gestão da Biblioteca!</h2>
+        <p class="mt-2 text-gray-600">Utilize o menu de navegação acima para gerenciar obras, usuários e empréstimos.</p>
+        <p class="mt-4">
+            <a href="{{ url_for('main.criar_dados') }}" class="text-indigo-600 hover:text-indigo-900">Clique aqui para popular o banco de dados com dados de teste.</a>
+        </p>
+    </div>
+{% endblock %}

@@ -1,13 +1,11 @@
 from . import db
 
-# Tabela de associação N:N
 obra_autor_association = db.Table('obra_autor',
     db.Column('id_obra', db.Integer, db.ForeignKey('obra.id'), primary_key=True),
     db.Column('id_autor', db.Integer, db.ForeignKey('autor.id'), primary_key=True)
 )
 
 class Usuario(db.Model):
-    # ... (código existente, sem alterações)
     __tablename__ = 'usuario'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(150), nullable=False)
@@ -25,27 +23,22 @@ class Obra(db.Model):
     titulo = db.Column(db.String(255), nullable=False)
     ano_publicacao = db.Column(db.Integer)
     
-    # --- MODIFICADO PARA HERANÇA ---
-    # Esta coluna vai dizer ao SQLAlchemy qual o tipo de cada obra.
     tipo_obra = db.Column(db.String(50), nullable=False)
 
     autores = db.relationship('Autor', secondary=obra_autor_association, back_populates='obras')
     exemplares = db.relationship('Exemplar', back_populates='obra')
     reservas = db.relationship('Reserva', back_populates='obra')
 
-    # Configuração especial para dizer ao SQLAlchemy como lidar com a herança
     __mapper_args__ = {
-        'polymorphic_identity': 'obra',  # Identidade da classe base
-        'polymorphic_on': tipo_obra      # Coluna que define o tipo
+        'polymorphic_identity': 'obra',  
+        'polymorphic_on': tipo_obra      
     }
 
     def __repr__(self):
         return f'<Obra {self.titulo}>'
 
-# --- NOVAS CLASSES DE HERANÇA ---
 class Livro(Obra):
     __tablename__ = 'livro'
-    # A chave primária do livro é também uma chave estrangeira para a obra
     id_obra = db.Column(db.Integer, db.ForeignKey('obra.id'), primary_key=True)
     isbn = db.Column(db.String(20))
     editora = db.Column(db.String(100))
@@ -82,7 +75,6 @@ class Dissertacao(Obra):
 
 
 class Autor(db.Model):
-    # ... (código existente, sem alterações)
     __tablename__ = 'autor'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(150), nullable=False)
@@ -92,7 +84,6 @@ class Autor(db.Model):
         return f'<Autor {self.nome}>'
 
 class Exemplar(db.Model):
-    # ... (código existente, sem alterações)
     __tablename__ = 'exemplar'
     id = db.Column(db.Integer, primary_key=True)
     codigo_exemplar = db.Column(db.String(20), nullable=False, unique=True)
@@ -104,7 +95,6 @@ class Exemplar(db.Model):
         return f'<Exemplar Cód: {self.codigo_exemplar}>'
 
 class Emprestimo(db.Model):
-    # ... (código existente, sem alterações)
     __tablename__ = 'emprestimo'
     id = db.Column(db.Integer, primary_key=True)
     data_emprestimo = db.Column(db.DateTime, nullable=False)
@@ -118,7 +108,6 @@ class Emprestimo(db.Model):
         return f'<Emprestimo ID: {self.id}>'
 
 class Reserva(db.Model):
-    # ... (código existente, sem alterações)
     __tablename__ = 'reserva'
     id = db.Column(db.Integer, primary_key=True)
     data_reserva = db.Column(db.DateTime, nullable=False)
