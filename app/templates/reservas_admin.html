@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1 class="text-3xl font-bold tracking-tight text-gray-900">Reservas Pendentes</h1>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white p-6 rounded shadow-md max-w-4xl mx-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th>Título</th>
+                <th>Aluno</th>
+                <th>Data da Reserva</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in reservas %}
+            <tr>
+                <td>{{ r.obra.titulo }}</td>
+                <td>{{ r.usuario.nome }}</td>
+                <td>{{ r.data_reserva.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td class="space-x-2">
+                    <form action="{{ url_for('main.aprovar_reserva', id=r.id) }}" method="POST" style="display:inline;">
+                        <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500">Aprovar</button>
+                    </form>
+                    <form action="{{ url_for('main.rejeitar_reserva', id=r.id) }}" method="POST" style="display:inline;">
+                        <button class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-500">Rejeitar</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-gray-500">Nenhuma reserva pendente.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,9 +1,10 @@
-from flask import render_template, request, redirect, url_for, flash, abort
+from flask import render_template, request, redirect, url_for, flash, abort, jsonify
 from . import db, models
 from flask_login import login_required, current_user
 from .routes import main
 from sqlalchemy import func
 from datetime import datetime, timedelta, UTC
+from itertools import chain
 
 # --- ROTAS DO PAINEL DE ADMIN ---
 
@@ -45,8 +46,17 @@ def listar_usuarios():
 @main.route('/admin/obras')
 @login_required
 def listar_obras_admin():
-    if current_user.tipo != 'admin': abort(403)
-    obras = models.Obra.query.order_by(models.Obra.titulo).all()
+    if current_user.tipo != 'admin':
+        abort(403)
+
+    livros = models.Livro.query.all()
+    teses = models.Tese.query.all()
+    # se tiver dissertação como classe separada
+    dissertacoes = models.Dissertacao.query.all()  
+
+    obras = list(chain(livros, teses, dissertacoes))
+    obras.sort(key=lambda o: o.titulo.lower() if o.titulo else '')
+
     return render_template('obras.html', obras=obras)
 
 @main.route('/admin/emprestimos')
@@ -171,3 +181,69 @@ def toggle_status_exemplar(id_exemplar):
         flash(f'Exemplar {exemplar.codigo_exemplar} foi reativado.', 'success')
     db.session.commit()
     return redirect(url_for('main.detalhes_obra', id_obra=id_obra_pai))
+
+@main.route('/api/obras/search')
+@login_required
+def search_obras_api():
+    livros = models.Livro.query.all()
+    teses = models.Tese.query.all()
+    dissertacoes = models.Dissertacao.query.all()  
+    obras = list(chain(livros, teses, dissertacoes))
+    obras.sort(key=lambda o: o.titulo.lower() if o.titulo else '')
+
+    resultados = []
+    for obra in obras:
+        resultados.append({
+            'id': obra.id,
+            'titulo': obra.titulo,
+            'ano_publicacao': getattr(obra, 'ano_publicacao', None),
+            'tipo_obra': obra.tipo_obra,
+            'genero': getattr(obra, 'genero', None),
+            'tem_exemplares_disponiveis': True 
+        })
+
+    return jsonify(resultados)
+
+@main.route('/admin/reservas')
+@login_required
+def listar_reservas():
+    if current_user.tipo != 'admin': abort(403)
+    reservas = models.Reserva.query.filter_by(status='pendente').order_by(models.Reserva.data_reserva.desc()).all()
+    return render_template('reservas_admin.html', reservas=reservas)
+
+@main.route('/admin/reserva/<int:id>/aprovar', methods=['POST'])
+@login_required
+def aprovar_reserva(id):
+    if current_user.tipo != 'admin': abort(403)
+    reserva = db.get_or_404(models.Reserva, id)
+    # Pega um exemplar disponível da obra
+    exemplar_disponivel = models.Exemplar.query.filter_by(obra_id=reserva.id_obra, status='disponivel').first()
+    if not exemplar_disponivel:
+        flash('Não há exemplares disponíveis para esta obra.', 'danger')
+        return redirect(url_for('main.listar_reservas'))
+
+    # Marca o exemplar como emprestado
+    exemplar_disponivel.status = 'emprestado'
+
+    # Cria o empréstimo
+    novo_emprestimo = models.Emprestimo(
+        usuario=reserva.usuario,
+        exemplar=exemplar_disponivel,
+        data_emprestimo=datetime.utcnow(),
+        data_prevista_devolucao=datetime.utcnow() + timedelta(days=7)  # ou outro prazo
+    )
+    reserva.status = 'aprovada'
+    db.session.add(novo_emprestimo)
+    db.session.commit()
+    flash(f'Reserva aprovada e empréstimo criado para "{reserva.obra.titulo}".', 'success')
+    return redirect(url_for('main.listar_reservas'))
+
+@main.route('/admin/reserva/<int:id>/rejeitar', methods=['POST'])
+@login_required
+def rejeitar_reserva(id):
+    if current_user.tipo != 'admin': abort(403)
+    reserva = db.get_or_404(models.Reserva, id)
+    reserva.status = 'rejeitada'
+    db.session.commit()
+    flash(f'Reserva para "{reserva.obra.titulo}" foi rejeitada.', 'info')
+    return redirect(url_for('main.listar_reservas'))

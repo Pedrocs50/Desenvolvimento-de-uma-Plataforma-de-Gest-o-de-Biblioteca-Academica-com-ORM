@@ -1,5 +1,3 @@
-# app/models.py
-
 from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -107,9 +105,10 @@ class Exemplar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     codigo_exemplar = db.Column(db.String(20), nullable=False, unique=True)
     status = db.Column(db.String(20), nullable=False)
-    id_obra = db.Column(db.Integer, db.ForeignKey('obra.id'), nullable=False)
+    obra_id = db.Column(db.Integer, db.ForeignKey('obra.id'), nullable=False)  # ALTERADO
     obra = db.relationship('Obra', back_populates='exemplares')
     emprestimos = db.relationship('Emprestimo', back_populates='exemplar')
+
     def __repr__(self):
         return f'<Exemplar Cód: {self.codigo_exemplar}>'
 

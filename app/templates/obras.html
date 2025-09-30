@@ -1,17 +1,24 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Catálogo de Obras</h1>
-        
-        <!-- Este botão só aparece se o usuário logado for um admin -->
-        {% if current_user.is_authenticated and current_user.tipo == 'admin' %}
-        <a href="{{ url_for('main.add_obra') }}" class="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            <svg class="-ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
-            Nova Obra
-        </a>
-        {% endif %}
-    </div>
+<div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Catálogo de Obras</h1>
+    
+    <!-- Este botão só aparece se o usuário logado for um admin -->
+    {% if current_user.is_authenticated and current_user.tipo == 'admin' %}
+    <a href="{{ url_for('main.add_obra') }}" class="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <svg class="-ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+        </svg>
+        Nova Obra
+    </a>
+    {% endif %}
+</div>
+
+<div class="flex justify-between items-center mt-4">
+    <input id="search-input" type="text" placeholder="Buscar obras..." 
+        class="rounded-md border px-3 py-2 focus:outline-none focus:ring focus:border-indigo-300">
+</div>
 {% endblock %}
 
 {% block content %}
@@ -22,34 +29,74 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ano</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponibilidade</th>
                 <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
             </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            {% for obra in obras %}
-            <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    <!-- CORREÇÃO: Para o admin, o título é um link. Para o aluno, é só texto. -->
-                    {% if current_user.is_authenticated and current_user.tipo == 'admin' %}
-                        <a href="{{ url_for('main.detalhes_obra', id_obra=obra.id) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">
-                            {{ obra.titulo }}
-                        </a>
-                    {% else %}
-                        {{ obra.titulo }}
-                    {% endif %}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ obra.ano_publicacao }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{{ obra.tipo_obra }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <!-- Espaço para futuras ações como Editar/Remover -->
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhuma obra encontrada.</td>
-            </tr>
-            {% endfor %}
+        <tbody id="obras-tbody" class="bg-white divide-y divide-gray-200">
+            <!-- O JavaScript vai popular aqui -->
         </tbody>
     </table>
 </div>
+
+<script>
+const userTipo = "{{ current_user.tipo }}";
+const tbody = document.getElementById('obras-tbody');
+const searchInput = document.getElementById('search-input');
+
+// Busca todas as obras da API
+async function fetchObras() {
+    const res = await fetch('/api/obras/search');
+    const data = await res.json();
+    return data;
+}
+
+// Renderiza as obras na tabela
+function renderObras(obras) {
+    if (obras.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nenhuma obra encontrada.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = obras.map(obra => {
+        let acoes = '';
+
+        // Se for aluno, mostrar botão de reserva
+        if (userTipo === 'aluno') {
+            acoes = `<form action="/reserva/${obra.id}/solicitar" method="POST" class="inline">
+                        <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-500">Reservar</button>
+                     </form>`;
+        }
+
+        // Badge de disponibilidade
+        let disponivelBadge = obra.exemplares && obra.exemplares.some(e => e.status === 'disponivel') ?
+            `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Disponível</span>` :
+            `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Indisponível</span>`;
+
+        // Se for admin, mostrar link para detalhes
+        let tituloHTML = userTipo === 'admin' ?
+            `<a href="/obra/${obra.id}/detalhes" class="text-indigo-600 hover:text-indigo-900 font-semibold">${obra.titulo}</a>` :
+            obra.titulo;
+
+        return `<tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${tituloHTML}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${obra.ano_publicacao || ''}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">${obra.tipo_obra}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${disponivelBadge}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${acoes}</td>
+        </tr>`;
+    }).join('');
+}
+
+// Filtra as obras localmente conforme o usuário digita
+searchInput.addEventListener('input', async () => {
+    const allObras = await fetchObras();
+    const term = searchInput.value.toLowerCase();
+    const filtered = allObras.filter(o => o.titulo.toLowerCase().includes(term));
+    renderObras(filtered);
+});
+
+// Carrega todas as obras quando a página abre
+fetchObras().then(renderObras);
+</script>
 {% endblock %}
