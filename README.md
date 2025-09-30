@@ -29,7 +29,7 @@ Este diagrama foi gerado utilizando DBML. O código-fonte do diagrama está disp
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repo.git
+git clone https://github.com/Pedrocs50/Desenvolvimento-de-uma-Plataforma-de-Gest-o-de-Biblioteca-Academica-com-ORM
 cd seu-repo
 ```
 
