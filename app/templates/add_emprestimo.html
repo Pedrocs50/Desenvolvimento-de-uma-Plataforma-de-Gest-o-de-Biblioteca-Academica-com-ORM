@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Realizar Novo Empréstimo</h1>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form action="{{ url_for('main.add_emprestimo') }}" method="POST">
+        <div class="space-y-6">
+            
+            <div>
+                <label for="id_usuario" class="block text-sm font-medium leading-6 text-gray-900">Selecione o Usuário (Aluno)</label>
+                <select id="id_usuario" name="id_usuario" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    <option value="" disabled selected>Escolha um usuário...</option>
+                    {% for usuario in usuarios %}
+                    <option value="{{ usuario.id }}">{{ usuario.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="id_exemplar" class="block text-sm font-medium leading-6 text-gray-900">Selecione o Exemplar Disponível</label>
+                <select id="id_exemplar" name="id_exemplar" required class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    <option value="" disabled selected>Escolha um exemplar...</option>
+                    {% for exemplar in exemplares %}
+                    <option value="{{ exemplar.id }}">{{ exemplar.obra.titulo }} (Cód: {{ exemplar.codigo_exemplar }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+                <div>
+                    <label for="data_emprestimo" class="block text-sm font-medium leading-6 text-gray-900">Data do Empréstimo</label>
+                    <div class="mt-2">
+                        <input type="date" name="data_emprestimo" id="data_emprestimo" value="{{ hoje }}" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label for="data_prevista_devolucao" class="block text-sm font-medium leading-6 text-gray-900">Previsão de Devolução</label>
+                    <div class="mt-2">
+                        <input type="date" name="data_prevista_devolucao" id="data_prevista_devolucao" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-8 flex items-center justify-end gap-x-6">
+            <a href="{{ url_for('main.listar_emprestimos_admin') }}" class="text-sm font-semibold leading-6 text-gray-900">Cancelar</a>
+            <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">Salvar Empréstimo</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

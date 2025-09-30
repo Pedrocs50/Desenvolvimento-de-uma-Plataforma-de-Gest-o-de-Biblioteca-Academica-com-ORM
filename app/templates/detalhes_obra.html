@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Detalhes da Obra: {{ obra.titulo }}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div>
+        <h2 class="text-2xl font-semibold text-gray-800 border-b pb-2 mb-4">Exemplares Desta Obra</h2>
+        <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 ...">Código do Exemplar</th>
+                        <th class="px-6 py-3 ...">Status</th>
+                        <th class="px-6 py-3 ...">Emprestado Para</th>
+                        <th class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for exemplar in obra.exemplares %}
+                    <tr>
+                        <td class="px-6 py-4 ...">{{ exemplar.codigo_exemplar }}</td>
+                        <td class="px-6 py-4 ...">
+                            {% if exemplar.status == 'disponivel' %}
+                                <span class="px-2 ... bg-green-100 text-green-800">Disponível</span>
+                            {% elif exemplar.status == 'emprestado' %}
+                                <span class="px-2 ... bg-yellow-100 text-yellow-800">Emprestado</span>
+                            {% else %}
+                                <span class="px-2 ... bg-gray-100 text-gray-800">Desativado</span>
+                            {% endif %}
+                        </td>
+                        
+                        {# Bloco para encontrar o empréstimo ativo #}
+                        {% set emprestimo_ativo = namespace(valor=None) %}
+                        {% for emprestimo in exemplar.emprestimos %}{% if not emprestimo.data_real_devolucao %}{% set emprestimo_ativo.valor = emprestimo %}{% endif %}{% endfor %}
+
+                        <td class="px-6 py-4 ...">
+                            {% if emprestimo_ativo.valor %}{{ emprestimo_ativo.valor.usuario.nome }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                            {% if emprestimo_ativo.valor %}
+                            <form action="{{ url_for('main.devolver_emprestimo', id=emprestimo_ativo.valor.id) }}" method="POST" class="inline">
+                                <button type="submit" class="text-indigo-600 hover:text-indigo-900">Devolver</button>
+                            </form>
+                            {% endif %}
+
+                            {% if exemplar.status != 'emprestado' %}
+                            <form action="{{ url_for('main.toggle_status_exemplar', id_exemplar=exemplar.id) }}" method="POST" class="inline">
+                                {% if exemplar.status == 'disponivel' %}
+                                <button type="submit" class="text-red-600 hover:text-red-900">Desativar</button>
+                                {% else %}
+                                <button type="submit" class="text-green-600 hover:text-green-900">Reativar</button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhum exemplar cadastrado para esta obra.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

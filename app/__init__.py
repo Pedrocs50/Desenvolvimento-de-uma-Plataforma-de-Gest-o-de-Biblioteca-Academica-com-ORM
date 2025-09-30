@@ -1,34 +1,36 @@
 # app/__init__.py
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
-# Crie a instância do DB fora da função
 db = SQLAlchemy()
+login_manager = LoginManager()
 
 def create_app():
-    # Cria a instância da aplicação Flask
-    app = Flask(__name__,
-                instance_relative_config=True,
-                static_folder='static',
-                template_folder='templates')
-
-    # Configuração do Banco de Dados
+    app = Flask(__name__, instance_relative_config=True, static_folder='static', template_folder='templates')
+    
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///biblioteca.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # Chave secreta para habilitar mensagens 'flash'
-    app.config['SECRET_KEY'] = 'uma-chave-secreta-para-o-projeto-do-ifsp-jacarei'
+    app.config['SECRET_KEY'] = 'uma-chave-secreta-para-o-projeto-do-ifsp'
 
-    # Conecta a instância do DB com a aplicação
     db.init_app(app)
+    login_manager.init_app(app)
+    login_manager.login_view = 'main.login'
 
     with app.app_context():
-        # Importe seus modelos para garantir que o SQLAlchemy os reconheça
         from . import models
 
-        # Importa e registra o blueprint que contém todas as nossas rotas.
-        # Esta é a linha que "conecta" tudo.
+        @login_manager.user_loader
+        def load_user(user_id):
+            return db.session.get(models.Usuario, int(user_id))
+
+        # 1. Importa o Blueprint vazio
         from .routes import main as main_blueprint
+
+        # 2. Importa os arquivos de rotas para "popular" o blueprint
+        from . import auth_routes, user_routes, admin_routes
+
+        # 3. Registra o blueprint (agora completo) na aplicação
         app.register_blueprint(main_blueprint)
 
     return app

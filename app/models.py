@@ -1,19 +1,38 @@
+# app/models.py
+
 from . import db
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 obra_autor_association = db.Table('obra_autor',
     db.Column('id_obra', db.Integer, db.ForeignKey('obra.id'), primary_key=True),
     db.Column('id_autor', db.Integer, db.ForeignKey('autor.id'), primary_key=True)
 )
 
-class Usuario(db.Model):
+class Usuario(db.Model, UserMixin): # <-- MUDANÇA 1: Herda de UserMixin
     __tablename__ = 'usuario'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
-    tipo = db.Column(db.String(20), nullable=False)
+    
+    # MUDANÇA 2: Novo campo para a senha criptografada
+    senha_hash = db.Column(db.String(256))
+
+    tipo = db.Column(db.String(20), nullable=False) # 'aluno' ou 'admin'
     status = db.Column(db.String(20), nullable=False, default='Ativo')
+    
     emprestimos = db.relationship('Emprestimo', back_populates='usuario')
     reservas = db.relationship('Reserva', back_populates='usuario')
+
+    # MUDANÇA 3: Novos métodos para gerenciar a senha
+    def set_senha(self, senha):
+        """Cria um hash seguro da senha e o armazena."""
+        self.senha_hash = generate_password_hash(senha)
+
+    def check_senha(self, senha):
+        """Verifica se a senha fornecida corresponde ao hash armazenado."""
+        return check_password_hash(self.senha_hash, senha)
+
     def __repr__(self):
         return f'<Usuario {self.nome}>'
 
@@ -44,7 +63,7 @@ class Livro(Obra):
     editora = db.Column(db.String(100))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'livro', # Identidade desta subclasse
+        'polymorphic_identity': 'livro',
     }
     def __repr__(self):
         return f'<Livro {self.titulo}>'

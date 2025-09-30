@@ -3,10 +3,14 @@
 {% block header %}
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold tracking-tight text-gray-900">Catálogo de Obras</h1>
+        
+        <!-- Este botão só aparece se o usuário logado for um admin -->
+        {% if current_user.is_authenticated and current_user.tipo == 'admin' %}
         <a href="{{ url_for('main.add_obra') }}" class="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             <svg class="-ml-0.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
             Nova Obra
         </a>
+        {% endif %}
     </div>
 {% endblock %}
 
@@ -18,18 +22,31 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ano</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
             </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
             {% for obra in obras %}
             <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ obra.titulo }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <!-- CORREÇÃO: Para o admin, o título é um link. Para o aluno, é só texto. -->
+                    {% if current_user.is_authenticated and current_user.tipo == 'admin' %}
+                        <a href="{{ url_for('main.detalhes_obra', id_obra=obra.id) }}" class="text-indigo-600 hover:text-indigo-900 font-semibold">
+                            {{ obra.titulo }}
+                        </a>
+                    {% else %}
+                        {{ obra.titulo }}
+                    {% endif %}
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ obra.ano_publicacao }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{{ obra.tipo_obra }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <!-- Espaço para futuras ações como Editar/Remover -->
+                </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="3" class="px-6 py-4 text-center text-gray-500">Nenhuma obra encontrada.</td>
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">Nenhuma obra encontrada.</td>
             </tr>
             {% endfor %}
         </tbody>
