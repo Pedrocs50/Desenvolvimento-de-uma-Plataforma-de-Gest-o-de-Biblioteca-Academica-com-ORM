@@ -59,6 +59,67 @@ def listar_obras_admin():
 
     return render_template('obras.html', obras=obras)
 
+@main.route('/admin/autores', methods=['GET'])
+@login_required
+def listar_autores():
+    if current_user.tipo != 'admin':
+        abort(403)
+
+    # Pega o parâmetro de filtro da URL
+    nacionalidade_filtro = request.args.get('nacionalidade')
+    
+    # Busca todas as nacionalidades distintas para popular o dropdown do filtro
+    nacionalidades = db.session.query(models.Autor.nacionalidade).distinct().order_by(models.Autor.nacionalidade).all()
+
+    query = models.Autor.query
+    if nacionalidade_filtro:
+        query = query.filter_by(nacionalidade=nacionalidade_filtro)
+    
+    autores = query.order_by(models.Autor.nome).all()
+    
+    return render_template('autores.html', 
+                           autores=autores, 
+                           nacionalidades=nacionalidades, 
+                           filtro_ativo=nacionalidade_filtro)
+
+@main.route('/admin/autores/add', methods=['GET', 'POST'])
+@login_required
+def add_autor():
+    if current_user.tipo != 'admin':
+        abort(403)
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        nacionalidade = request.form.get('nacionalidade')
+        
+        if models.Autor.query.filter_by(nome=nome).first():
+            flash('Este autor já está cadastrado.', 'danger')
+        else:
+            novo_autor = models.Autor(nome=nome, nacionalidade=nacionalidade)
+            db.session.add(novo_autor)
+            db.session.commit()
+            flash('Autor adicionado com sucesso!', 'success')
+            return redirect(url_for('main.listar_autores'))
+
+    return render_template('add_autor.html')
+
+@main.route('/autor/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_autor(id):
+    if current_user.tipo != 'admin':
+        abort(403)
+    
+    autor = db.get_or_404(models.Autor, id)
+    
+    # REGRA DE NEGÓCIO: Não permite remover autor com obras associadas.
+    if autor.obras:
+        flash(f'Erro: Não é possível remover o autor "{autor.nome}" pois ele possui obras cadastradas.', 'danger')
+    else:
+        db.session.delete(autor)
+        db.session.commit()
+        flash(f'Autor "{autor.nome}" removido com sucesso.', 'success')
+        
+    return redirect(url_for('main.listar_autores'))
+
 @main.route('/admin/emprestimos')
 @login_required
 def listar_emprestimos_admin():
