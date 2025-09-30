@@ -7,13 +7,12 @@ obra_autor_association = db.Table('obra_autor',
     db.Column('id_autor', db.Integer, db.ForeignKey('autor.id'), primary_key=True)
 )
 
-class Usuario(db.Model, UserMixin): # <-- MUDANÇA 1: Herda de UserMixin
+class Usuario(db.Model, UserMixin): 
     __tablename__ = 'usuario'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
     
-    # MUDANÇA 2: Novo campo para a senha criptografada
     senha_hash = db.Column(db.String(256))
 
     tipo = db.Column(db.String(20), nullable=False) # 'aluno' ou 'admin'
@@ -22,7 +21,6 @@ class Usuario(db.Model, UserMixin): # <-- MUDANÇA 1: Herda de UserMixin
     emprestimos = db.relationship('Emprestimo', back_populates='usuario')
     reservas = db.relationship('Reserva', back_populates='usuario')
 
-    # MUDANÇA 3: Novos métodos para gerenciar a senha
     def set_senha(self, senha):
         """Cria um hash seguro da senha e o armazena."""
         self.senha_hash = generate_password_hash(senha)
@@ -39,17 +37,34 @@ class Obra(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(255), nullable=False)
     ano_publicacao = db.Column(db.Integer)
-    
     tipo_obra = db.Column(db.String(50), nullable=False)
+    
+    genero = db.Column(db.String(100))
 
     autores = db.relationship('Autor', secondary=obra_autor_association, back_populates='obras')
-    exemplares = db.relationship('Exemplar', back_populates='obra')
-    reservas = db.relationship('Reserva', back_populates='obra')
+    exemplares = db.relationship('Exemplar', back_populates='obra', cascade="all, delete-orphan")
+    reservas = db.relationship('Reserva', back_populates='obra', cascade="all, delete-orphan")
 
     __mapper_args__ = {
         'polymorphic_identity': 'obra',  
         'polymorphic_on': tipo_obra      
     }
+
+    def to_dict(self):
+        """Converte o objeto Obra para um dicionário (JSON) para a API."""
+        
+        # Lógica para verificar se há exemplares disponíveis
+        tem_exemplares_disponiveis = any(e.status == 'disponivel' for e in self.exemplares)
+
+        return {
+            'id': self.id,
+            'titulo': self.titulo,
+            'ano_publicacao': self.ano_publicacao,
+            'tipo_obra': self.tipo_obra,
+            'genero': self.genero or "", # Retorna string vazia se for nulo
+            'autores': [autor.nome for autor in self.autores],
+            'tem_exemplares_disponiveis': tem_exemplares_disponiveis
+        }
 
     def __repr__(self):
         return f'<Obra {self.titulo}>'

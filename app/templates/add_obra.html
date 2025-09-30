@@ -31,15 +31,24 @@
                     <input type="text" name="titulo" id="titulo" required class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
                 </div>
             </div>
-            <div>
-                <label for="ano_publicacao" class="block text-sm font-medium leading-6 text-gray-900">Ano de Publicação</label>
-                <div class="mt-2">
-                    <input type="number" name="ano_publicacao" id="ano_publicacao" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+            
+            <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+                <div>
+                    <label for="ano_publicacao" class="block text-sm font-medium leading-6 text-gray-900">Ano de Publicação</label>
+                    <div class="mt-2">
+                        <input type="number" name="ano_publicacao" id="ano_publicacao" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label for="genero" class="block text-sm font-medium leading-6 text-gray-900">Gênero</label>
+                    <div class="mt-2">
+                        <input type="text" name="genero" id="genero" placeholder="Ex: Fantasia, Ficção" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
+                    </div>
                 </div>
             </div>
 
             <div id="campos_livro">
-                <div>
+                <div class="mt-6">
                     <label for="isbn" class="block text-sm font-medium leading-6 text-gray-900">ISBN</label>
                     <div class="mt-2">
                         <input type="text" name="isbn" id="isbn" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
@@ -54,7 +63,7 @@
             </div>
 
             <div id="campos_tese" style="display: none;">
-                <div>
+                <div class="mt-6">
                     <label for="programa_pos" class="block text-sm font-medium leading-6 text-gray-900">Programa de Pós-Graduação</label>
                     <div class="mt-2">
                         <input type="text" name="programa_pos" id="programa_pos" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
@@ -78,9 +87,7 @@
                         {% endfor %}
                     </select>
                 </div>
-
                 <p class="mt-4 text-sm text-center text-gray-500">ou</p>
-
                 <label for="novo_autor_nome" class="mt-4 block text-sm font-medium leading-6 text-gray-900">Adicione um Novo Autor</label>
                 <div class="mt-2">
                     <input type="text" name="novo_autor_nome" id="novo_autor_nome" placeholder="Ex: Machado de Assis" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm">
@@ -101,19 +108,15 @@
         var camposLivro = document.getElementById('campos_livro');
         var camposTese = document.getElementById('campos_tese');
         
-        // Esconde todos os campos dinâmicos
         camposLivro.style.display = 'none';
         camposTese.style.display = 'none';
         
-        // Mostra os campos correspondentes ao tipo selecionado
         if (tipo === 'livro') {
             camposLivro.style.display = 'block';
         } else if (tipo === 'tese' || tipo === 'dissertacao') {
             camposTese.style.display = 'block';
         }
     });
-
-    // Dispara o evento 'change' na carga da página para configurar o estado inicial
     document.getElementById('tipo_obra').dispatchEvent(new Event('change'));
 </script>
 {% endblock %}

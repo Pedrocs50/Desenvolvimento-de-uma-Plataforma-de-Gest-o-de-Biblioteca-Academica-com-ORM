@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, abort, jso
 from . import db, models
 from flask_login import login_required, current_user
 from .routes import main
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from datetime import datetime, timedelta, UTC
 from itertools import chain
 
@@ -185,24 +185,30 @@ def toggle_status_exemplar(id_exemplar):
 @main.route('/api/obras/search')
 @login_required
 def search_obras_api():
-    livros = models.Livro.query.all()
-    teses = models.Tese.query.all()
-    dissertacoes = models.Dissertacao.query.all()  
-    obras = list(chain(livros, teses, dissertacoes))
-    obras.sort(key=lambda o: o.titulo.lower() if o.titulo else '')
-
-    resultados = []
-    for obra in obras:
-        resultados.append({
-            'id': obra.id,
-            'titulo': obra.titulo,
-            'ano_publicacao': getattr(obra, 'ano_publicacao', None),
-            'tipo_obra': obra.tipo_obra,
-            'genero': getattr(obra, 'genero', None),
-            'tem_exemplares_disponiveis': True 
-        })
-
-    return jsonify(resultados)
+    # Esta API é acessível por todos os usuários logados para a busca
+    
+    termo = request.args.get('termo', '')
+    tipo = request.args.get('tipo', '')
+    
+    query = models.Obra.query
+    
+    # Filtro dinâmico no backend (mais eficiente)
+    if termo:
+        try:
+            ano = int(termo)
+            query = query.filter(models.Obra.ano_publicacao == ano)
+        except ValueError:
+            query = query.filter(or_(
+                models.Obra.titulo.ilike(f'%{termo}%'),
+                models.Obra.genero.ilike(f'%{termo}%')
+            ))
+    
+    if tipo:
+        query = query.filter(models.Obra.tipo_obra == tipo)
+        
+    obras = query.order_by(models.Obra.titulo).all()
+    
+    return jsonify([obra.to_dict() for obra in obras])
 
 @main.route('/admin/reservas')
 @login_required
