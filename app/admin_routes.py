@@ -246,14 +246,11 @@ def toggle_status_exemplar(id_exemplar):
 @main.route('/api/obras/search')
 @login_required
 def search_obras_api():
-    # Esta API é acessível por todos os usuários logados para a busca
-    
     termo = request.args.get('termo', '')
     tipo = request.args.get('tipo', '')
-    
+
     query = models.Obra.query
-    
-    # Filtro dinâmico no backend (mais eficiente)
+
     if termo:
         try:
             ano = int(termo)
@@ -263,13 +260,26 @@ def search_obras_api():
                 models.Obra.titulo.ilike(f'%{termo}%'),
                 models.Obra.genero.ilike(f'%{termo}%')
             ))
-    
+
     if tipo:
         query = query.filter(models.Obra.tipo_obra == tipo)
-        
+
     obras = query.order_by(models.Obra.titulo).all()
-    
-    return jsonify([obra.to_dict() for obra in obras])
+
+    # Cria um dict para cada obra, incluindo o ID de um exemplar disponível
+    def obra_to_dict(obra):
+        exemplar_disponivel = next((ex for ex in obra.exemplares if ex.status == 'disponivel'), None)
+        return {
+            'id': obra.id,
+            'titulo': obra.titulo,
+            'genero': obra.genero,
+            'ano_publicacao': obra.ano_publicacao,
+            'tipo_obra': obra.tipo_obra,
+            'tem_exemplares_disponiveis': exemplar_disponivel is not None,
+            'id_exemplar': exemplar_disponivel.id if exemplar_disponivel else None
+        }
+
+    return jsonify([obra_to_dict(obra) for obra in obras])
 
 @main.route('/admin/reservas')
 @login_required

@@ -67,7 +67,7 @@ async function fetchAndRenderObras() {
     try {
         const res = await fetch(url);
         const obras = await res.json();
-        
+
         tbody.innerHTML = '';
 
         if (obras.length === 0) {
@@ -81,14 +81,14 @@ async function fetchAndRenderObras() {
                 `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Indisponível</span>`;
 
             let acoes = '';
-            if (userTipo === 'aluno' && !obra.tem_exemplares_disponiveis) {
+            if (userTipo === 'aluno' && obra.tem_exemplares_disponiveis && obra.id_exemplar) {
                 acoes = `
-                    <form action="/obra/${obra.id}/reservar" method="POST">
+                    <form action="/reserva/${obra.id_exemplar}/solicitar" method="POST">
                         <button type="submit" class="text-indigo-600 hover:text-indigo-900">Reservar</button>
                     </form>
                 `;
             }
-            
+
             const tituloHTML = userTipo === 'admin' ?
                 `<a href="/obra/${obra.id}/detalhes" class="text-indigo-600 hover:text-indigo-900 font-semibold">${obra.titulo}</a>` :
                 obra.titulo;
